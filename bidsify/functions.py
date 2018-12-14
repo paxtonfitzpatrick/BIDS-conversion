@@ -69,6 +69,89 @@ def bidsify(origpath, destpath, n_sessions=2, scan_types=None, scan_names=None, 
             'bold5' : 'task-rest_run-05_bold'
         }
 
+    # Handles changing file names during move
+    def rename(file, root, n_sessions, scan_names, destpath_abs, log_changes, log_name, verbose):
+
+        # viarable to track unsuccessfully renamed files
+        problem_file = None
+
+        old_path = os.path.join(root, file)
+        base, ext = os.path.splitext(file)
+        splitpath = root.split('/')
+
+        # get subject ID
+        sub = splitpath[-2].split('_')[0]
+
+        # get session number
+        ses_number = splitpath[-2].split('_')[1]
+        if int(ses_number) <= n_sessions:
+            session = 'ses-'+ses_number
+
+        else:
+            print('unrecognized session number \'' + ses_number + '\' for subID ' + sub)
+            problem_file = file
+
+        # get scan type (or log)
+        if splitpath[-1] == 'ANATOMY':
+            runtype = 'anat'
+
+        elif splitpath[-1] == 'FUNCTIONAL':
+            runtype = 'func'
+
+        elif splitpath[-1] == 'LOG':
+            runtype = 'LOG'
+
+        else:
+            print('unrecognized scan or log folder ' + splitpath[-1] + ' for subID ' + sub)
+            problem_file = file
+
+        # format scan name (or preserve name of log file)
+        if base in scan_names:
+            new_name = scan_names[base]
+
+        elif ext =='.log':
+            new_name = base
+
+        else:
+            print('unrecognized scan name ' + base + ' for file ' + file)
+            problem_file = file
+
+        try:
+            if runtype != 'LOG':
+                new_path = os.path.join(destpath_abs, sub, session, runtype, sub+'_'+new_name+ext)
+            else:
+                new_path = os.path.join(destpath_abs, sub, session, runtype, new_name+ext)
+
+            if log_changes:
+                writelog(log_name, old_path, destpath_abs, sub, session, new_name, ext, verbose)
+
+        except NameError:
+            new_path = None
+
+
+        return new_path, problem_file
+
+    # writes/updates log of moving and renaming file
+    def writelog(log_name, old_path, destpath_abs, sub, session, new_name, ext, verbose):
+
+        filename = os.path.join(destpath_abs, sub, session, 'LOG', log_name + '.log')
+
+        if os.path.exists(filename):
+            mode = 'a'
+
+        else:
+            mode = 'w'
+
+        with open(filename, mode) as f:
+            f.write(
+                date.today().strftime('%Y-%m-%d') + '\n' +
+                ' - ' + new_name+ext + ' moved from ' + old_path + '\n'
+            )
+
+        if verbose:
+            print('wrote to log file ' + filename)
+
+
     for i, (root, dirs, files) in enumerate(os.walk(origpath_abs)):
         # create new directory structure
         if i == 0:
@@ -80,7 +163,7 @@ def bidsify(origpath, destpath, n_sessions=2, scan_types=None, scan_names=None, 
             if file_list:
                 for file in file_list:
                     old_filepath = os.path.join(root, file)
-                    new_filepath, problem_file = _rename(file, root, n_sessions, scan_names, destpath_abs, log_changes, verbose)
+                    new_filepath, problem_file = rename(file, root, n_sessions, scan_names, destpath_abs, log_changes, verbose)
 
                     if new_filepath is not None:
                         # move and rename
@@ -95,85 +178,3 @@ def bidsify(origpath, destpath, n_sessions=2, scan_types=None, scan_names=None, 
 
                     if problem_files:
                         print('The following files were not successfully converted: ' + problem_files)
-
-# Handles changing file names during move
-def _rename(file, root, n_sessions, scan_names, destpath_abs, log_changes, log_name, verbose):
-
-    # viarable to track unsuccessfully renamed files
-    problem_file = None
-
-    old_path = os.path.join(root, file)
-    base, ext = os.path.splitext(file)
-    splitpath = root.split('/')
-
-    # get subject ID
-    sub = splitpath[-2].split('_')[0]
-
-    # get session number
-    ses_number = splitpath[-2].split('_')[1]
-    if int(ses_number) <= n_sessions:
-        session = 'ses-'+ses_number
-
-    else:
-        print('unrecognized session number \'' + ses_number + '\' for subID ' + sub)
-        problem_file = file
-
-    # get scan type (or log)
-    if splitpath[-1] == 'ANATOMY':
-        runtype = 'anat'
-
-    elif splitpath[-1] == 'FUNCTIONAL':
-        runtype = 'func'
-
-    elif splitpath[-1] == 'LOG':
-        runtype = 'LOG'
-
-    else:
-        print('unrecognized scan or log folder ' + splitpath[-1] + ' for subID ' + sub)
-        problem_file = file
-
-    # format scan name (or preserve name of log file)
-    if base in scan_names:
-        new_name = scan_names[base]
-
-    elif ext =='.log':
-        new_name = base
-
-    else:
-        print('unrecognized scan name ' + base + ' for file ' + file)
-        problem_file = file
-
-    try:
-        if runtype != 'LOG':
-            new_path = os.path.join(destpath_abs, sub, session, runtype, sub+'_'+new_name+ext)
-        else:
-            new_path = os.path.join(destpath_abs, sub, session, runtype, new_name+ext)
-
-        if log_changes:
-            _writelog(log_name, old_path, destpath_abs, sub, session, new_name, ext, verbose)
-
-    except NameError:
-        new_path = None
-
-
-    return new_path, problem_file
-
-# writes/updates log of moving and renaming file
-def _writelog(log_name, old_path, destpath_abs, sub, session, new_name, ext, verbose):
-
-    filename = os.path.join(destpath_abs, sub, session, 'LOG', log_name + '.log')
-
-    if os.path.exists(filename):
-        mode = 'a'
-
-    else:
-        mode = 'w'
-
-    with open(filename, mode) as f:
-        f.write(
-            date.today().strftime('%Y-%m-%d') + '\n' +
-            ' - ' + new_name+ext + ' moved from ' + old_path + '\n'
-        )
-
-    if verbose:
-        print('wrote to log file ' + filename)
