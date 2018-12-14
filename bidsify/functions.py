@@ -163,7 +163,7 @@ def bidsify(origpath, destpath, n_sessions=2, scan_types=None, scan_names=None, 
             if file_list:
                 for file in file_list:
                     old_filepath = os.path.join(root, file)
-                    new_filepath, problem_file = rename(file, root, n_sessions, scan_names, destpath_abs, log_changes, verbose)
+                    new_filepath, problem_file = rename(file, root, n_sessions, scan_names, destpath_abs, log_changes, log_name, verbose)
 
                     if new_filepath is not None:
                         # move and rename
