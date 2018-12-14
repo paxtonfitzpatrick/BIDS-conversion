@@ -1,7 +1,15 @@
+import sys
+import argparse
 import os
 import shutil
 from datetime import date
 
+'-----------------------------------------------------------------'
+    # configuration for calling from command line
+parser = argparse.ArgumentParser(description='Convert data to BIDS format')
+parser.add_argument('origpath', type=str, )
+
+'-----------------------------------------------------------------'
 
 def bidsify(origpath, destpath, n_sessions=2, scan_types=None, scan_names=None, log_changes=True, log_name='CHANGES', verbose=False):
 
