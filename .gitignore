@@ -1,3 +1,4 @@
 .*
 !/.gitignore
 bidsify/__pycache__/
+*.pyc
