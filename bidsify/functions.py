@@ -3,7 +3,8 @@ import shutil
 from datetime import date
 
 
-def bidsify(origpath, destpath, n_sessions=2, scan_types=None, detect_size=True, log_changes=True, log_name='CHANGES', log_errors=True, errlog_path = None, verbose=True):
+def bidsify(origpath, destpath, n_sessions=2, scan_types=None, detect_size=True, log_changes=True, log_name='CHANGES',
+            log_errors=True, errlog_path = None, verbose=True):
 
     """
     Copies files and reorganizes directory structure to comply with BIDS convention
@@ -86,7 +87,8 @@ def bidsify(origpath, destpath, n_sessions=2, scan_types=None, detect_size=True,
         if i == 0:
             if verbose:
                 print('Creating BIDS directory structure...')
-            [os.makedirs(destpath_abs+'/'+direc.split('_')[0]+'/ses-'+str(ses+1)+'/'+scantype, exist_ok=True) for direc in dirs for scantype in scan_types for ses in range(n_sessions)]
+            [os.makedirs(destpath_abs+'/'+direc.split('_')[0]+'/ses-'+str(ses+1)+'/'+scantype, exist_ok=True) for \
+             direc in dirs for scantype in scan_types for ses in range(n_sessions)]
 
         # move and rename files
         file_list = [f for f in files if not f.startswith('.')]
@@ -98,7 +100,8 @@ def bidsify(origpath, destpath, n_sessions=2, scan_types=None, detect_size=True,
 
             # for name mapping based on file size
             if method == 'size':
-                path_map, prob_fs = _rename_size(file_list, splitroot, sub, ses, n_sessions, destpath_abs, log_changes, log_name, verbose)
+                path_map, prob_fs = _rename_size(file_list, splitroot, sub, ses, n_sessions, destpath_abs,
+                                                 log_changes, log_name, verbose)
 
                 for old_filepath, new_filepath in path_map.items():
                     if verbose:
@@ -138,7 +141,7 @@ def _rename_size(file_list, splitroot, sub, ses, n_sessions, destpath_abs, log_c
 
     old_fps = [os.path.join(os.sep,*splitroot,file) for file in file_list]
     path_maps = dict.fromkeys(old_fps)
-    sizes_dict = {os.stat(file).st_size: file for file in old_fps}
+    sizes_dict = {file: os.stat(file).st_size for file in old_fps}
     prob_fs = {}
 
     # get session number
@@ -173,7 +176,7 @@ def _rename_size(file_list, splitroot, sub, ses, n_sessions, destpath_abs, log_c
         mcrs = []
         swms = []
         leftovers = []
-        for size, old_file in sizes_dict.items():
+        for old_file, size in sizes_dict.items():
             # expected size of resting state scan (+/- 2kb)
             if size in range(110590352, 110594352):
                 rests.append(old_file)
