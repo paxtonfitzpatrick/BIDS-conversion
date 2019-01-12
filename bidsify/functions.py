@@ -115,6 +115,7 @@ def bidsify(origpath, destpath, n_sessions=2, scan_types=None, detect_size=True,
                     else:
                         problem_files[sub].update({ses : prob_fs})
 
+    print('------------------------')
     if problem_files and log_errors:
         if verbose:
             print('Writing error log file')
@@ -273,7 +274,7 @@ def _write_errorlog(problem_files, errlog_path):
         f.write('BIDSIFY FILE CONVERSION ERRORS:\n')
 
         for sub, ses in problem_files.items():
-            f.write(sub+'\n')
+            f.write('\n'+sub+'\n')
             for ses, errs in ses.items():
                 f.write('\tsession ' + ses + ':\n')
                 for k,v in errs.items():
