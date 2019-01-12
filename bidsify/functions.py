@@ -217,7 +217,6 @@ def _rename_size(file_list, splitroot, sub, ses, n_sessions, destpath_abs, log_c
         else:
             prob_fs['SWM'] = 'No scan files matching expected size for SWM'
 
-
         if len(leftovers) == 1:
             path_maps[leftovers[0]] = os.path.join(destpath_abs, sub, session, 'func', sub+'_task-dd_run-04_bold.nii')
         else:
@@ -234,10 +233,6 @@ def _rename_size(file_list, splitroot, sub, ses, n_sessions, destpath_abs, log_c
         prob_fs[''] = 'unrecognized scan or log folder: ' + splitroot[-1]
         return path_maps, prob_fs
 
-    # create & write log file in destination dir with record of move
-    if log_changes:
-        _write_changelog(log_name, path_maps, destpath_abs, sub, session, verbose)
-
     # note any scan files not mapped...
     unmapped = [old_file for old_file, new_file in path_maps.items() if not new_file]
     if unmapped:
@@ -245,6 +240,10 @@ def _rename_size(file_list, splitroot, sub, ses, n_sessions, destpath_abs, log_c
 
     # ...and filter them from the dictionary
     filtered_path_maps = {k: v for k, v in path_maps.items() if v is not None}
+
+    # create & write log file in destination dir with record of move
+    if log_changes:
+        _write_changelog(log_name, filtered_path_maps, destpath_abs, sub, session, verbose)
 
     return filtered_path_maps, prob_fs
 
