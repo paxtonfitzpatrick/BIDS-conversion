@@ -1,8 +1,6 @@
-import sys
 import argparse
 from functions import bidsify
 
-# argparse setup for calling from command line
 parser = argparse.ArgumentParser(description='Convert data to BIDS format')
 parser.add_argument('origpath', type=str, help='Path to directory of files to be BIDSified')
 parser.add_argument('destpath', type=str, help='Path to output directory for BIDSified files.')
@@ -17,5 +15,4 @@ parser.add_argument('--verbose', action='store_false', help='Print progress upda
 
 args = parser.parse_args()
 
-print(args)
-#bidsify(args.origpath, args.destpath, args.n_sessions, args.scan_types, args.scan_names, args.no_log, args.log_name, args.verbose)
+bidsify(args.origpath, args.destpath, args.n_sessions, args.scan_types, args.detect_size, args.log_changes, args.log_name, args.log_errors, args.errlog_path, args.verbose)
