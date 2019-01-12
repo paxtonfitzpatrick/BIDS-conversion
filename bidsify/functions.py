@@ -75,7 +75,7 @@ def bidsify(origpath, destpath, n_sessions=2, scan_types=None, detect_size=True,
         if errlog_path is None:
             errlog_path = os.path.abspath(os.path.curdir)
         else:
-            errlog_path = os.path.abspath(errlog_path)
+            errlog_path = os.path.abspath(os.path.expanduser(errlog_path))
 
     for i, (root, dirs, files) in enumerate(os.walk(origpath_abs, topdown=True)):
 
@@ -136,7 +136,7 @@ def _rename_size(file_list, splitroot, sub, ses, n_sessions, destpath_abs, log_c
 
     """ Defines naming scheme for files based on size """
 
-    old_fps = [os.path.join(*splitroot,file) for file in file_list]
+    old_fps = [os.path.join(os.sep,*splitroot,file) for file in file_list]
     path_maps = dict.fromkeys(old_fps)
     sizes_dict = {os.stat(file).st_size: file for file in old_fps}
     prob_fs = {}
@@ -155,14 +155,17 @@ def _rename_size(file_list, splitroot, sub, ses, n_sessions, destpath_abs, log_c
         # expected size for mprage files (bytes)
         right_size = 28836192
         # use file that matches expected size, or if none do, use one closest to expected size
-        best_scan = sizes_dict[right_size] if right_size in sizes_dict else sizes_dict[min(sizes_dict.keys(), key=lambda k: abs(k-right_size))]
-
-        if right_size not in sizes_dict.keys():
-            prob_fs[best_scan.split('/')[-1]] = 'No mprage of expected size. Used closest match: ' + best_scan.split('/')[-1]
+        if right_size in sizes_dict.values():
+            best_scan = [k for k, v in sizes_dict.items() if v == right_size][-1]
+        else:
+            best_scan = \
+            [k for k, v in sizes_dict.items() if v == min(sizes_dict.items(), key=lambda x: abs(right_size - x[1]))[1]][
+                -1]
+            prob_fs[best_scan.split('/')[-1]] = 'No mprage of expected size. Used closest match: ' + \
+                                                best_scan.split('/')[-1]
 
         new_name = 'T1w.nii'
-        path_maps[best_scan] = os.path.join(destpath_abs, sub, session, 'anat', sub+'_T1w.nii')
-
+        path_maps[best_scan] = os.path.join(destpath_abs, sub, session, 'anat', sub + '_T1w.nii')
 
     # deal with functional scans
     elif splitroot[-1] == 'FUNCTIONAL':
