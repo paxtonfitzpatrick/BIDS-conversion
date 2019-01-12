@@ -54,8 +54,8 @@ def bidsify(origpath, destpath, n_sessions=2, scan_types=None, detect_size=True,
 
 
     # convert to absolute paths if relative path is passed
-    origpath_abs = os.path.abspath(origpath)
-    destpath_abs = os.path.abspath(destpath)
+    origpath_abs = os.path.abspath(os.path.expanduser(origpath))
+    destpath_abs = os.path.abspath(os.path.expanduser(destpath))
 
     # dict to hold unsuccessfully handled files with errors
     problem_files = {}
