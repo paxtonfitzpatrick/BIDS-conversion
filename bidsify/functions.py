@@ -184,7 +184,7 @@ def _rename_size(file_list, splitroot, sub, ses, n_sessions, destpath_abs, log_c
 
             # expected size of mcr scan (+/- 2kb)
             elif size in range(77412752, 77416752):
-                mrcs.append(old_file)
+                mcrs.append(old_file)
 
             # expected size of swm scan (+/- 2kb)
             elif size in range(82942352, 82946352):
