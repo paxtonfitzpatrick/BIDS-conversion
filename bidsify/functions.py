@@ -87,7 +87,7 @@ def bidsify(origpath, destpath, n_sessions=2, scan_types=None, detect_size=True,
         if i == 0:
             if verbose:
                 print('Creating BIDS directory structure...')
-            [os.makedirs(destpath_abs+'/'+direc.split('_')[0]+'/ses-'+str(ses+1)+'/'+scantype, exist_ok=True) for \
+            [os.makedirs(destpath_abs+'/sub-'+direc.split('_')[0]+'/ses-'+str(ses+1)+'/'+scantype, exist_ok=True) for \
              direc in dirs for scantype in scan_types for ses in range(n_sessions)]
 
         # move and rename files
@@ -96,7 +96,7 @@ def bidsify(origpath, destpath, n_sessions=2, scan_types=None, detect_size=True,
 
             # store subject ID & session number
             splitroot = root.split('/')
-            sub, ses = splitroot[-2].split('_')[0], splitroot[-2].split('_')[1].lstrip('0')
+            sub, ses = 'sub-'+splitroot[-2].split('_')[0], splitroot[-2].split('_')[1].lstrip('0')
 
             # for name mapping based on file size
             if method == 'size':
@@ -169,7 +169,7 @@ def _rename_size(file_list, splitroot, sub, ses, n_sessions, destpath_abs, log_c
                                                 best_scan.split('/')[-1]
 
         new_name = 'T1w.nii'
-        path_maps[best_scan] = os.path.join(destpath_abs, sub, session, 'anat', sub + '_T1w.nii')
+        path_maps[best_scan] = os.path.join(destpath_abs, sub, session, 'anat', sub+'_'+session+'_'+'_acq-MPRAGE_T1w.nii')
 
     # deal with functional scans
     elif splitroot[-1] == 'FUNCTIONAL':
